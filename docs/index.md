@@ -25,12 +25,11 @@ flowchart LR
   kg --> ans(["cited answers<br/><i>graph traversal, not re-reading</i>"])
 ```
 
-The **lens** is a per-corpus schema induced by the LLM from your stated intent and the
-artifact's actual content. In practice: a user with a niche query pattern — a covenant reviewer,
-an adaptation writer, an onboarding engineer — describes what they care about in plain words and
-gets a retrieval system custom-built for that exact use case, on the fly, without needing to
-know what RAG is. Same engine, same store, same query surface; the lens is the only thing that
-changes:
+The **lens** is a per-corpus schema, induced from your stated intent and from what the
+artifact actually contains. You describe what you care about in plain words, and Tantva builds a
+retrieval system fitted to that use case. A covenant reviewer, an adaptation writer, and an
+onboarding engineer each get a different index from the same engine, and none of them needs to
+know what RAG is. The engine, the store, and the query surface never change; only the lens does:
 
 | Who | Corpus | What the lens builds | What one call answers |
 |---|---|---|---|
