@@ -98,9 +98,9 @@ hurts it.
   its extraction pass; this bounds the architecture.
 - **The canon splits along surface form.** Named-entity aggregations ("every story Lestrade
   appears in") stayed grep-friendly even at 624k words — surface forms are what text search is
-  good at, and the graph gave back points there to one fabricated edge and one volume miscount.
-  The graph won the questions with no greppable surface form: clients who deceive Holmes, cases
-  with no crime, relational patterns across volumes (relational bucket 3.5 vs 2.0).
+  good at. The graph won the questions with no greppable surface form: clients who deceive
+  Holmes, cases with no crime, relational patterns across volumes (relational bucket 3.5 vs
+  2.0).
 
 ## Results — code corpus (Sentry, six repos)
 
