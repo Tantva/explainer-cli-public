@@ -29,13 +29,31 @@ The **lens** is a per-corpus schema, induced from your stated intent and from wh
 artifact actually contains. You describe what you care about in plain words, and Tantva builds a
 retrieval system fitted to that use case. A covenant reviewer, an adaptation writer, and an
 onboarding engineer each get a different index from the same engine, and none of them needs to
-know what RAG is. The engine, the store, and the query surface never change; only the lens does:
+know what RAG is. The engine, the store, and the query surface never change; only the lens does.
+
+A real session, on a corpus outside the evaluation — a Mahabharata play. The user states what
+they care about in plain words, and the pipeline starts from that:
+
+![Stating intent in plain words at setup](images/setup-intent.png)
+
+
 
 | Who | Corpus | What the lens builds | What one call answers |
 |---|---|---|---|
 | Credit analyst | A credit agreement | • Every defined term, with its definition<br>• Covenants and events of default<br>• Links from each clause to the terms it relies on | "If this definition changes, what breaks?" |
 | Screenwriter | A novel | • The cast, with each character's names merged into one entry<br>• Scenes, and who appears together | "Who shares scenes with whom?" |
 | Platform engineer | A multi-repo codebase | • A call graph per repo<br>• The routes and queues that connect the repos | "Trace this event across the repos" |
+
+Once the graph is built, relational questions are answered from it — with the judgment calls
+shown and every claim page-cited:
+
+![A relational question answered from the graph, page-cited](images/relational-question.png)
+
+And the answers stay grounded in the corpus. Here the graph is traced for an ancestry question,
+and where the text names no answer, the answer says so instead of filling the gap from outside
+knowledge:
+
+![A grounded answer that traces the graph and declines outside knowledge](images/grounded-answer.png)
 
 Everything runs locally inside your Claude Code session — the engine makes zero model calls, so
 there is no API key and your data stays on your machine. Every node and edge carries its
