@@ -111,13 +111,13 @@ ingest, cheap structured retrieval at query time — addresses both.
 Chunking is per artifact kind and structure-aware. The chunk is the citation unit, so chunk
 boundaries follow the artifact's own structure:
 
-| artifact | strategy |
+| Artifact | Strategy |
 |---|---|
-| **code** | tree-sitter parse → one chunk per function/class, with file/line locators; the call graph comes from the same parse |
-| **docs / markdown** | heading-aware splits; legal `SECTION/ARTICLE` headings and screenplay sluglines are also recognized, so a section or scene is not split mid-unit |
-| **PDF** | per-page text extraction; pages become citable `p<N>` units, indexed like any text |
-| **prose / books** | page or chapter units, following the source's native structure |
-| **specs (OpenAPI)** | one chunk per route; these also feed the route-binding extractor |
+| **Code** | Tree-sitter parse → one chunk per function/class, with file/line locators; the call graph comes from the same parse |
+| **Docs / markdown** | Heading-aware splits; legal `SECTION/ARTICLE` headings and screenplay sluglines are also recognized, so a section or scene is not split mid-unit |
+| **PDF** | Per-page text extraction; pages become citable `p<N>` units, indexed like any text |
+| **Prose / books** | Page or chapter units, following the source's native structure |
+| **Specs (OpenAPI)** | One chunk per route; these also feed the route-binding extractor |
 
 The cross-reference extractor and the LLM extraction stage both assume a chunk corresponds to a
 coherent unit (a section, a scene, a function), which is why boundary detection is done per
@@ -125,14 +125,14 @@ artifact kind rather than by fixed-size windows.
 
 ## Tools
 
-| layer | choice | why |
+| Layer | Choice | Why |
 |---|---|---|
-| storage | SQLite (single file) | local, zero-ops, transactional; sufficient for single-analyst corpora |
-| code parsing | tree-sitter | language-accurate functions, classes, and call edges |
-| retrieval | static embeddings (Model2Vec) + BM25, keyword fallback | CPU-only, no API; degrades gracefully if the model is unavailable |
-| interface | MCP server (~25 tools) | works with any MCP host; Claude Code is the primary one |
-| orchestration | Claude Code skills + subagents | the pipeline's judgment steps are prompts, versioned in the repo like code |
-| packaging | `uv` + a Claude Code plugin marketplace | one-command install; dependencies resolve on first launch |
+| Storage | SQLite (single file) | local, zero-ops, transactional; sufficient for single-analyst corpora |
+| Code parsing | tree-sitter | language-accurate functions, classes, and call edges |
+| Retrieval | static embeddings (Model2Vec) + BM25, keyword fallback | CPU-only, no API; degrades gracefully if the model is unavailable |
+| Interface | MCP server (~25 tools) | works with any MCP host; Claude Code is the primary one |
+| Orchestration | Claude Code skills + subagents | the pipeline's judgment steps are prompts, versioned in the repo like code |
+| Packaging | `uv` + a Claude Code plugin marketplace | one-command install; dependencies resolve on first launch |
 
 ## Tradeoffs accepted
 

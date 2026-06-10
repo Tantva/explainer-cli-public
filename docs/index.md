@@ -26,14 +26,14 @@ flowchart LR
 ```
 
 The **lens** is a per-corpus schema induced by the LLM from your stated intent and the
-artifact's actual content — never from a question list. Same engine, same store, same query
-surface; the lens is the only thing that changes:
+artifact's actual content. Same engine, same store, same query surface; the lens is the only
+thing that changes:
 
-| who | corpus | the lens builds | one call answers |
+| Who | Corpus | What the lens builds | What one call answers |
 |---|---|---|---|
-| credit analyst | a credit agreement | `defined_term` / `covenant` / `event_of_default` nodes, `uses_term` edges | "if this definition changes, what breaks?" |
-| screenwriter | a novel | characters, scenes, `shares_scene`, aliases resolved | "who shares scenes with whom?" |
-| platform engineer | a multi-repo codebase | call graphs, cross-repo route/topic bindings | "trace this event across the repos" |
+| Credit analyst | A credit agreement | • Every defined term, with its definition<br>• Covenants and events of default<br>• Links from each clause to the terms it relies on | "If this definition changes, what breaks?" |
+| Screenwriter | A novel | • The cast, with each character's names merged into one entry<br>• Scenes, and who appears together | "Who shares scenes with whom?" |
+| Platform engineer | A multi-repo codebase | • A call graph per repo<br>• The routes and queues that connect the repos | "Trace this event across the repos" |
 
 Everything runs locally inside your Claude Code session — the engine makes zero model calls, so
 there is no API key and your data stays on your machine. Every node and edge carries its
@@ -47,13 +47,13 @@ citation.
 custom-designs the index for exactly that use case. The same engine serves whoever shows up
 next.
 
-| who | the problem | with Tantva | from the eval |
+| Who | The problem | What Tantva does | Result from the evaluation |
 |---|---|---|---|
-| **Priya** — staff engineer onboarding to a multi-repo system | the cross-repo picture doesn't exist anywhere; `grep` misses dynamic wiring (runtime URLs, Kafka topics from config) | route/topic bindings, the call graph, and doc↔code links make one question return a cited, cross-repo trace | a five-hop SDK→ClickHouse trace, each hop cited `repo/file:line` — 1 agent and ~63 tool calls vs 39 agents and 818 reading from scratch |
-| **Alex** — credit analyst working a contract | a credit agreement is a web of definitions; amending one silently moves ratios and baskets elsewhere | every defined term extracted, `uses_term` dependency edges wired, aliases resolved — blast radius is one graph call | found all **6** consumers of a changed term (baseline: 3); the baseline inverted the default-cure logic, the graph got it right |
-| **Sam** — screenwriter adapting a novel | text search counts strings, not people — censuses and rankings are silently wrong across maiden names and honorifics | the character/scene graph plus entity resolution collapses each character into one node | on *Pachinko*: baseline census 9 vs the true 10–12, ranked by first mention; the alias-resolved graph got both right |
-| **Dr. Rao** — researcher over an unfamiliar domain corpus | the right way to index isn't known up front; a bespoke pipeline per domain is weeks of engineering | state your role and goals; a schema is induced, validated, and extracted into — and must generalize to unseen questions | 3 of 3 blind lens inductions covered every must-have type, relation, and domain area in the rubric |
-| **Maya** — docs / knowledge-management owner | docs go stale silently; nothing links what a doc claims to what the code does | doc↔code edges carry confidence and provenance, so drift becomes a first-class, cited finding | flagged that an authoritative doc had been mis-linked to a test fixture — surfaced its own weak spot, with evidence |
+| **Priya** — staff engineer onboarding to a multi-repo system | • The cross-repo picture isn't written down anywhere<br>• Text search misses wiring that only exists at runtime (URLs built in code, queue names read from config) | • Indexes the repos once<br>• Maps which service calls which route, and who produces and consumes each queue<br>• One question returns the full path, cited file and line | • Traced an event five hops across three repos, every hop cited<br>• Used 1 agent and ~63 tool calls; the same model reading from scratch used 39 agents and 818 |
+| **Alex** — credit analyst reviewing a contract | • A credit agreement is a web of defined terms<br>• Amending one definition silently changes ratios and limits elsewhere in the document | • Extracts every defined term and records which clauses rely on it<br>• "What's affected if this changes" becomes a single lookup | • Found all 6 clauses relying on a changed term; the read-everything baseline found 3<br>• The baseline got the default-and-cure rules backwards; the graph got them right |
+| **Sam** — screenwriter adapting a novel | • Characters go by several names (maiden name, married name, honorific)<br>• Text search counts strings, not people, so casts and rankings come out wrong | • Builds the cast and scene graph<br>• Merges each character's names into one entry, so counts and rankings are real | • Counted a family correctly (10–12 members) where the baseline string-counted 9<br>• Ranked first appearances by actual presence, not first mention |
+| **Dr. Rao** — researcher in an unfamiliar domain | • The right way to index isn't known up front<br>• Building a custom pipeline per domain is weeks of engineering | • You describe your role and goals<br>• Tantva designs the schema for that domain, checks it against the material, and extracts into it | • 3 of 3 blind schema designs covered every must-have type, relation, and topic area in a hand-built rubric |
+| **Maya** — documentation owner | • Docs go stale silently<br>• Nothing connects what a doc claims to what the code does | • Links each doc claim to the code it describes, with a confidence score and source<br>• Drift becomes a finding you can cite, not a surprise | • Flagged a doc that its own indexer had linked to the wrong code, with evidence |
 
 ---
 

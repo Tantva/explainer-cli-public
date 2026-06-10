@@ -64,14 +64,14 @@ failed without it:
 
 Six corpora judged head-to-head, 20 points each.
 
-| corpus | artifact type | size | grep | Tantva | verdict |
+| Corpus | Artifact type | Size | grep | Tantva | Verdict |
 |---|---|---|---|---|---|
-| **Credit agreement** | legal | 93k words | 18.5 | **19.0** | **Tantva** — relational bucket 7.0 vs 5.5 |
-| **Pachinko** | novel (alias-heavy, 3 generations) | 481 pp | 18.0 | **19.5** | **Tantva** — discriminating 13.5 vs 12.0 |
-| **Classic Indian Cooking** | reference / recipes | 566 pp | 18.5 | 18.5 | tie |
-| **Dune** (Book 1) | novel | 345 pp | **20.0** | 19.5 | grep |
-| **Andor** screenplay | screenplay | 55 pp | **20.0** | 19.5 | grep |
-| **Indian Economy** | textbook | 1,099 pp | **18.0** | 17.0 | grep |
+| **Credit agreement** | Legal | 93k words | 18.5 | **19.0** | **Tantva** — relational bucket 7.0 vs 5.5 |
+| **Pachinko** | Novel (alias-heavy, 3 generations) | 481 pp | 18.0 | **19.5** | **Tantva** — discriminating 13.5 vs 12.0 |
+| **Classic Indian Cooking** | Reference / recipes | 566 pp | 18.5 | 18.5 | tie |
+| **Dune** (Book 1) | Novel | 345 pp | **20.0** | 19.5 | grep |
+| **Andor** screenplay | Screenplay | 55 pp | **20.0** | 19.5 | grep |
+| **Indian Economy** | Textbook | 1,099 pp | **18.0** | 17.0 | grep |
 | **Total** | | | **113.0 / 120** | **113.0 / 120** | **tie (94.2%)** |
 
 **Thesis 1 (parity): confirmed.** A tie across 120 judged questions. Both contestants also passed
@@ -99,7 +99,7 @@ Grounding discipline drives abstention; the index neither helps nor hurts it.
 The code eval used the same protocol, with the verified key as baseline (native Claude reading
 the repos from scratch is the key).
 
-| | quality (/20) | agents | tool calls | query tokens |
+| | Quality (/20) | Agents | Tool calls | Query tokens |
 |---|:--:|:--:|:--:|:--:|
 | Native Claude (read everything) | 20.0 | 39 | 818 | ~1.17M |
 | **Tantva (single pass over index)** | **17.5** | **1** | **~63** | small (one agent) |
@@ -115,11 +115,11 @@ comparison was possible.
 
 Ingest (one-time) is reported separately from query time (recurring):
 
-| corpus | grep per question set | Tantva ingest (once) | Tantva query |
+| Corpus | grep per question set | Tantva ingest (once) | Tantva query |
 |---|---|---|---|
-| contract (93k words) | ~60k tok · 15 min | ~275k tok · 15 min | ~11 graph calls + cited retrieval |
-| cookbook (566 pp) | ~310k tok (whole-book fan-out) | ~1.9M tok · 65 min | ~92 graph calls |
-| textbook (1,099 pp) | ~80k tok · 22 min (selective) | ~1.4M tok · 22 min | ~57 calls |
+| Contract (93k words) | ~60k tok · 15 min | ~275k tok · 15 min | ~11 graph calls + cited retrieval |
+| Cookbook (566 pp) | ~310k tok (whole-book fan-out) | ~1.9M tok · 65 min | ~92 graph calls |
+| Textbook (1,099 pp) | ~80k tok · 22 min (selective) | ~1.4M tok · 22 min | ~57 calls |
 | Pachinko (481 pp) | ~29 calls · 20 min (recurs every session) | ~648k tok · 12 min | ~40 calls, zero page reads |
 
 Two observations. First, at these sizes a single question set does not amortize the ingest; grep
