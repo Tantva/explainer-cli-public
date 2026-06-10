@@ -5,171 +5,116 @@ nav_order: 1
 
 # Tantva
 
-**Smart RAG: induce a schema from the user's intent, index any corpus into a typed, cited
-knowledge graph, then answer from the graph instead of re-reading.**
+**Tell it what you want to ask. It designs the index.**
+
+Tantva turns any corpus — code, contracts, novels, textbooks — into a typed, cited knowledge
+graph shaped by your intent, then answers from the graph instead of re-reading.
+
+[Get started](https://github.com/Tantva/explainer-cli-public#setup--step-by-step){: .btn .btn-primary }
+[See the evaluation](evaluation){: .btn }
+[System design](system-design){: .btn }
+
+---
 
 ## The central idea
 
-Plain RAG chunks everything and hopes embeddings surface the answer. A general agent re-reads the
-corpus on every question. Tantva takes a third path: first understand what the user wants to ask,
-and then design the index for it.
+Plain RAG chunks everything and hopes embeddings surface the answer. A general agent re-reads
+the corpus on every question. Tantva takes a third path: first understand what the user wants to
+ask, then design the index for it.
 
-The unit of that design is a **lens**: a per-corpus schema (entity types, relation types,
-properties) induced by the LLM from the user's stated intent and the artifact's actual content.
+```mermaid
+flowchart LR
+  intent(["your intent<br/><i>role + goals, in your words</i>"]) --> lens["induced <b>lens</b><br/>entity types · relations · properties"]
+  lens --> graph[("typed, cited<br/>knowledge graph")]
+  graph --> ans(["cited answers<br/><i>graph traversal, not re-reading</i>"])
+```
 
-For example:
+The **lens** is a per-corpus schema induced by the LLM from your stated intent and the
+artifact's actual content — never from a question list. Same engine, same store, same query
+surface; the lens is the only thing that changes:
 
-- a credit analyst's contract gets `defined_term` / `covenant` / `event_of_default` nodes and
-  `uses_term` blast-radius edges;
-- a screenwriter's novel gets characters, scenes, and `shares_scene`;
-- a multi-repo codebase gets call graphs and cross-repo topic bindings.
+| who | corpus | the lens builds | one call answers |
+|---|---|---|---|
+| credit analyst | a credit agreement | `defined_term` / `covenant` / `event_of_default` nodes, `uses_term` edges | "if this definition changes, what breaks?" |
+| screenwriter | a novel | characters, scenes, `shares_scene`, aliases resolved | "who shares scenes with whom?" |
+| platform engineer | a multi-repo codebase | call graphs, cross-repo route/topic bindings | "trace this event across the repos" |
 
-Same engine, same store, same query surface. The lens is the only thing that changes. The lens is
-induced from the user's role and goals, never from a known question list, and every type is
-anchored to a small upper spine (agent · event · information_object · …) so graphs stay joinable
-across domains.
+Everything runs locally inside your Claude Code session — the engine makes zero model calls, so
+there is no API key and your data stays on your machine. Every node and edge carries its
+citation.
 
-Three design commitments follow:
-
-1. **Grounded by construction.** Every node and edge carries provenance (chunk/section/file:line,
-   confidence, method). An answer is a set of cited claims.
-2. **The LLM is the engine's "soul," not its plumbing.** The engine (a generic SQLite property
-   graph + deterministic extraction primitives + MCP tools) makes zero model calls. All judgment
-   (inducing the lens, schema-guided extraction, query-time synthesis) runs in the user's own
-   Claude Code session and its subagents. No API key; data stays local.
-3. **Pay once, query forever.** The expensive understanding (a schema-guided LLM extraction pass
-   over every chunk, then entity resolution) happens once at ingest; query cost is then small and
-   independent of corpus size.
+---
 
 ## Who it's for
 
-Tantva is broad by design: one engine over any corpus. The risk of a broad tool is that it feels
-unfocused. We answer that two ways:
+### Priya — staff engineer onboarding to a multi-repo system
 
-1. **Breadth is principled, not vague.** Every corpus is indexed through a **lens** into a typed,
-   cited graph, not a blob of text. Code becomes a call graph plus cross-repo wiring; a novel
-   becomes a character/place/scene graph; a contract becomes a web of defined terms and the
-   clauses that depend on them.
-2. **Each story stands on its own.** Every persona below maps to a corpus in the evaluation, and
-   the claimed win is one the eval actually measured.
+**The cross-repo picture doesn't exist anywhere.** `grep` drowns her in matches and misses
+dynamic wiring (a URL built at runtime, a Kafka topic resolved through config). Tantva ingests
+the repos once; route/topic bindings, the call graph, and doc↔code links make a single question
+return a cited, cross-repo trace.
 
-The common thread: questions that span the corpus and need connective tissue, not just retrieval.
+> "How does an event get from the SDK to ClickHouse?" — a five-hop trace across
+> `sentry-python → relay → snuba`, each hop cited `repo/file:line`. One agent and ~63 tool
+> calls, where the same model reading from scratch used 39 agents and 818.
+{: .result }
 
----
+### Alex — credit analyst working a contract
 
-### 1. Priya — staff engineer onboarding to a multi-repo system
+**A credit agreement is a web of definitions.** Amending one definition silently moves ratios
+and baskets elsewhere in the document. Tantva's legal lens extracts every defined term, wires
+term-dependency (`uses_term`) edges, and resolves aliases — blast radius becomes one graph call.
 
-**Needs:** to understand how a large system fits together — how services talk, and what breaks if
-she changes something.
+> Tantva found all six consumers of a changed defined term where the read-everything baseline
+> found three — and the baseline confidently inverted the contract's default-cure logic, while
+> the graph's covenant→default edges got it right.
+{: .result }
 
-**Difficulty:** the knowledge is tribal and undocumented. `grep` across repos drowns her in
-matches and misses dynamic wiring (a URL built at runtime, a Kafka topic resolved through
-config). Nothing shows the cross-repo picture.
+### Sam — screenwriter adapting a novel
 
-**How Tantva helps:** ingest the repos once; the graph holds cross-repo route/topic bindings, the
-call graph, and doc↔code links, so a single question returns a cited, cross-repo trace.
+**Text search counts strings, not people.** A 500-page cast goes by maiden names, married
+names, and honorifics, so every census and ranking is silently wrong. Tantva's prose lens
+builds the character/scene graph and entity resolution collapses each character into one node.
 
-> *From the eval (Sentry, six repos):* "How does an event get from the SDK to ClickHouse?" — a
-> five-hop trace across `sentry-python → relay → snuba`, each hop cited `repo/file:line`. One
-> agent and ~63 tool calls, where the same model reading from scratch used 39 agents and 818.
+> On *Pachinko*, the baseline string-counted a family census (9 vs the true 10–12) and ranked
+> first appearances by first mention; the alias-resolved graph got both right.
+{: .result }
 
-### 2. Alex — credit analyst working a contract
+### Dr. Rao — researcher over an unfamiliar domain corpus
 
-**Needs:** before a refinancing: what the covenants require, what triggers a default, and how the
-defined terms interlock — for any term, what relies on it.
+**The right way to index isn't known up front.** Off-the-shelf RAG returns passages, not typed
+relationships; a bespoke extraction pipeline per domain is weeks of engineering. State your role
+and goals; Tantva induces a schema for that domain, validates it, and extracts into it — and the
+schema must generalize to questions you haven't asked yet.
 
-**Difficulty:** a credit agreement is a web of definitions. Amending one definition silently moves
-ratios and baskets elsewhere in the document; assembling that blast radius by reading means
-re-scanning 93k words per term, and it is easy to get wrong.
+### Maya — docs / knowledge-management owner
 
-**How Tantva helps:** the legal lens extracts every defined term with its definition, wires
-section cross-references and term-dependency (`uses_term`) edges, and resolves aliases
-("the Borrower" / "Borrower"). Blast radius becomes one graph call.
+**Docs go stale silently.** Nothing links what a doc claims to what the code does. Tantva emits
+doc↔code edges with confidence and provenance, so drift becomes a first-class, cited finding.
 
-> *From the eval:* Tantva found all six consumers of a changed defined term where the
-> read-everything baseline found three — and the baseline confidently inverted the contract's
-> default-cure logic, while the graph's covenant→default edges got it right.
-
-### 3. Sam — screenwriter adapting a novel
-
-**Needs:** the cast and how central each character is, who shares scenes with whom, the arcs
-across the whole book — to decide what to cut, merge, and dramatize.
-
-**Difficulty:** a 500-page cast doesn't fit in a mental map, and characters go by multiple names
-(maiden name, married name, honorific). Text search counts strings, not people, so every census
-and ranking is silently wrong.
-
-**How Tantva helps:** the prose lens builds the character/place/scene graph; entity resolution
-collapses each character's surface forms into one node, so presence rankings and co-occurrence
-are real.
-
-> *From the eval (Pachinko):* the baseline string-counted a family census (9 vs the true 10–12)
-> and ranked first appearances by first mention; the alias-resolved graph got both right.
-
-### 4. Dr. Rao — researcher over an unfamiliar domain corpus
-
-**Needs:** structured investigation of a corpus (reports, textbooks, mixed sources) where the
-right way to index isn't known up front.
-
-**Difficulty:** off-the-shelf RAG returns passages, not typed relationships ("what depends on
-what," "who administers what"). Building a bespoke extraction pipeline per domain is weeks of
-engineering.
-
-**How Tantva helps:** intent-driven lenses. State your role and goals; the system induces a
-schema (entities, relations, properties) for that domain, registers it, and extracts into it —
-deterministically where the artifact has structure, with a schema-guided LLM pass everywhere
-else. The artifact constrains what's possible; your intent decides what's built. The induced
-schema is validated before ingest and must generalize to questions you haven't asked yet.
-
-### 5. Maya — docs / knowledge-management owner
-
-**Needs:** to keep documentation aligned with the system it describes, and to catch drift before
-it misleads people.
-
-**Difficulty:** docs go stale silently. Nothing links what the doc claims to what the code does.
-
-**How Tantva helps:** the synthesis pass emits doc↔code edges with confidence and provenance —
-where a doc describes a symbol, and where it no longer matches. Drift becomes a first-class,
-cited finding. (On the Sentry corpus, Tantva flagged that an authoritative ingest doc had been
-mis-linked to a test fixture by its own synthesizer — it surfaced its own weak spot, with
-evidence.)
+> On the Sentry corpus, Tantva flagged that an authoritative ingest doc had been mis-linked to a
+> test fixture by its own synthesizer — it surfaced its own weak spot, with evidence.
+{: .result }
 
 ---
-
-### Why one tool, not five
-
-Priya, Alex, Sam, Dr. Rao, and Maya would otherwise reach for five different point tools. Tantva
-serves all five from one generic property-graph store, a lens registry, and the user's Claude
-Code as the reasoning engine. The lens is what makes breadth principled: it turns "index
-anything" into "index this domain into a typed, cited graph shaped by what this user needs."
 
 ## Scope
 
-- **In scope:** any text-bearing corpus (multi-repo codebases, legal contracts, novels,
-  screenplays, textbooks, cookbooks, multi-volume canons); lens induction from intent;
-  deterministic + LLM extraction; entity resolution; persona-aware cited investigation;
-  ingest-time wiki synthesis; a falsifiable eval program against a strong baseline.
+- **In scope:** any text-bearing corpus; lens induction from intent; deterministic + LLM
+  extraction; entity resolution; persona-aware cited investigation; ingest-time wiki synthesis;
+  a falsifiable eval program against a strong baseline.
 - **Out of scope (v1):** non-text media; engine-internal model calls; real-time/streaming
   ingestion; multi-user serving. The engine targets a single analyst's Claude Code session.
 
 ## What's built
 
 - **Engine** (`explainer-cli`): a local property-graph store where every node and edge carries
-  its citation; deterministic extractors for structured artifacts (sections, defined terms,
-  cross-references, call graphs); LLM-driven extraction for everything else; entity resolution.
-  Exposed to Claude Code as ~25 MCP tools. Grounded in established knowledge-representation
-  practice (schema/instance separation, provenance-bearing claims, a small upper ontology).
-- **Skills**: the prompts that drive the pipeline. Induce a lens from your intent, build the
-  graph, investigate with citations, and optionally synthesize a wiki from the graph. None of
-  them are domain-specific; the lens carries all domain knowledge.
-- **Evaluation**: 7 corpora (code, legal, novels, a screenplay, a textbook, a cookbook), 140
-  verified questions, judged against a strong same-model baseline that
-  reads the corpus directly. Tantva matches the baseline on accuracy overall and wins where the
-  corpus has dense internal structure. Full results in
+  its citation; deterministic extractors for structured artifacts; LLM-driven extraction for
+  everything else; entity resolution. Exposed to Claude Code as ~25 MCP tools.
+- **Skills**: the prompts that drive the pipeline — induce a lens from your intent, build the
+  graph, investigate with citations, optionally synthesize a wiki. None are domain-specific;
+  the lens carries all domain knowledge.
+- **Evaluation**: 7 corpora, 140 verified questions, judged against a strong same-model
+  baseline that reads the corpus directly. Tantva matches the baseline on accuracy overall and
+  wins where the corpus has dense internal structure. Full results in
   [Problem, Data & Evaluation](evaluation).
-
-## The documents here
-
-- **[System Design](system-design)**: architecture, tradeoffs, chunking strategy, and tools.
-- **[Problem, Data & Evaluation](evaluation)**: methodology, results across all corpora,
-  learnings, and further research.

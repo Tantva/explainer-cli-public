@@ -10,3 +10,7 @@ aux_links:
 aux_links_new_tab: true
 mermaid:
   version: "10.9.0"
+callouts:
+  result:
+    title: From the eval
+    color: green
