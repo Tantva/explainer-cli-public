@@ -14,3 +14,6 @@ callouts:
   result:
     title: From the eval
     color: green
+nav_external_links:
+  - title: Get started
+    url: https://github.com/Tantva/explainer-cli-public#setup--step-by-step

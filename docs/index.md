@@ -10,10 +10,6 @@ nav_order: 1
 Tantva turns any corpus — code, contracts, novels, textbooks — into a typed, cited knowledge
 graph shaped by your intent, then answers from the graph instead of re-reading.
 
-[Get started](https://github.com/Tantva/explainer-cli-public#setup--step-by-step){: .btn .btn-primary }
-[See the evaluation](evaluation){: .btn }
-[System design](system-design){: .btn }
-
 ---
 
 ## The central idea
@@ -25,8 +21,8 @@ ask, then design the index for it.
 ```mermaid
 flowchart LR
   intent(["your intent<br/><i>role + goals, in your words</i>"]) --> lens["induced <b>lens</b><br/>entity types · relations · properties"]
-  lens --> graph[("typed, cited<br/>knowledge graph")]
-  graph --> ans(["cited answers<br/><i>graph traversal, not re-reading</i>"])
+  lens --> kg[("typed, cited<br/>knowledge graph")]
+  kg --> ans(["cited answers<br/><i>graph traversal, not re-reading</i>"])
 ```
 
 The **lens** is a per-corpus schema induced by the LLM from your stated intent and the
@@ -47,54 +43,17 @@ citation.
 
 ## Who it's for
 
-### Priya — staff engineer onboarding to a multi-repo system
+**Broad on purpose.** Tantva isn't tuned to one domain — you tell Claude your niche, and it
+custom-designs the index for exactly that use case. The same engine serves whoever shows up
+next.
 
-**The cross-repo picture doesn't exist anywhere.** `grep` drowns her in matches and misses
-dynamic wiring (a URL built at runtime, a Kafka topic resolved through config). Tantva ingests
-the repos once; route/topic bindings, the call graph, and doc↔code links make a single question
-return a cited, cross-repo trace.
-
-> "How does an event get from the SDK to ClickHouse?" — a five-hop trace across
-> `sentry-python → relay → snuba`, each hop cited `repo/file:line`. One agent and ~63 tool
-> calls, where the same model reading from scratch used 39 agents and 818.
-{: .result }
-
-### Alex — credit analyst working a contract
-
-**A credit agreement is a web of definitions.** Amending one definition silently moves ratios
-and baskets elsewhere in the document. Tantva's legal lens extracts every defined term, wires
-term-dependency (`uses_term`) edges, and resolves aliases — blast radius becomes one graph call.
-
-> Tantva found all six consumers of a changed defined term where the read-everything baseline
-> found three — and the baseline confidently inverted the contract's default-cure logic, while
-> the graph's covenant→default edges got it right.
-{: .result }
-
-### Sam — screenwriter adapting a novel
-
-**Text search counts strings, not people.** A 500-page cast goes by maiden names, married
-names, and honorifics, so every census and ranking is silently wrong. Tantva's prose lens
-builds the character/scene graph and entity resolution collapses each character into one node.
-
-> On *Pachinko*, the baseline string-counted a family census (9 vs the true 10–12) and ranked
-> first appearances by first mention; the alias-resolved graph got both right.
-{: .result }
-
-### Dr. Rao — researcher over an unfamiliar domain corpus
-
-**The right way to index isn't known up front.** Off-the-shelf RAG returns passages, not typed
-relationships; a bespoke extraction pipeline per domain is weeks of engineering. State your role
-and goals; Tantva induces a schema for that domain, validates it, and extracts into it — and the
-schema must generalize to questions you haven't asked yet.
-
-### Maya — docs / knowledge-management owner
-
-**Docs go stale silently.** Nothing links what a doc claims to what the code does. Tantva emits
-doc↔code edges with confidence and provenance, so drift becomes a first-class, cited finding.
-
-> On the Sentry corpus, Tantva flagged that an authoritative ingest doc had been mis-linked to a
-> test fixture by its own synthesizer — it surfaced its own weak spot, with evidence.
-{: .result }
+| who | the problem | with Tantva | from the eval |
+|---|---|---|---|
+| **Priya** — staff engineer onboarding to a multi-repo system | the cross-repo picture doesn't exist anywhere; `grep` misses dynamic wiring (runtime URLs, Kafka topics from config) | route/topic bindings, the call graph, and doc↔code links make one question return a cited, cross-repo trace | a five-hop SDK→ClickHouse trace, each hop cited `repo/file:line` — 1 agent and ~63 tool calls vs 39 agents and 818 reading from scratch |
+| **Alex** — credit analyst working a contract | a credit agreement is a web of definitions; amending one silently moves ratios and baskets elsewhere | every defined term extracted, `uses_term` dependency edges wired, aliases resolved — blast radius is one graph call | found all **6** consumers of a changed term (baseline: 3); the baseline inverted the default-cure logic, the graph got it right |
+| **Sam** — screenwriter adapting a novel | text search counts strings, not people — censuses and rankings are silently wrong across maiden names and honorifics | the character/scene graph plus entity resolution collapses each character into one node | on *Pachinko*: baseline census 9 vs the true 10–12, ranked by first mention; the alias-resolved graph got both right |
+| **Dr. Rao** — researcher over an unfamiliar domain corpus | the right way to index isn't known up front; a bespoke pipeline per domain is weeks of engineering | state your role and goals; a schema is induced, validated, and extracted into — and must generalize to unseen questions | 3 of 3 blind lens inductions covered every must-have type, relation, and domain area in the rubric |
+| **Maya** — docs / knowledge-management owner | docs go stale silently; nothing links what a doc claims to what the code does | doc↔code edges carry confidence and provenance, so drift becomes a first-class, cited finding | flagged that an authoritative doc had been mis-linked to a test fixture — surfaced its own weak spot, with evidence |
 
 ---
 
