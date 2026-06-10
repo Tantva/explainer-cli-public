@@ -8,3 +8,5 @@ heading_anchors: true
 aux_links:
   "Project code": "https://github.com/Tantva/explainer-cli-public"
 aux_links_new_tab: true
+mermaid:
+  version: "10.9.0"

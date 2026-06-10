@@ -10,24 +10,25 @@ tradeoffs accepted.
 
 ## Architecture
 
-```
-┌─────────────────────────  user's Claude Code session  ─────────────────────────┐
-│                                                                                 │
-│   skills: induce-lens · setup (ingest pipeline) · investigate · extract · wiki  │
-│   (lens induction, LLM extraction, and answering run here, via subagents)       │
-│                                                                                 │
-└───────────────▲─────────────────────────────────────────────▲──────────────────┘
-                │            ~25 MCP tools (read + write)      │
-┌───────────────┴─────────────────────────────────────────────┴──────────────────┐
-│                         engine (Python, zero LLM calls)                         │
-│                                                                                 │
-│  lens registry        primitive registry         retrieval                      │
-│  (schemas, frozen,    (deterministic extractors, (static embeddings + BM25,     │
-│   spine-anchored)      dispatched per lens)       keyword fallback)             │
-│                                                                                 │
-│            SQLite property graph (one file, one workspace per corpus)           │
-│   workspaces · artifacts · chunks · entities · edges · mentions · lenses        │
-└─────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+  subgraph session["user's Claude Code session"]
+    skills["<b>skills</b><br/>induce-lens · setup (ingest pipeline) · investigate · extract · wiki<br/><i>lens induction, LLM extraction, and answering run here, via subagents</i>"]
+  end
+
+  skills <-->|"~25 MCP tools (read + write)"| lens
+  skills <-->|" "| prim
+  skills <-->|" "| ret
+
+  subgraph engine["engine (Python, zero LLM calls)"]
+    lens["<b>lens registry</b><br/>schemas: frozen,<br/>spine-anchored"]
+    prim["<b>primitive registry</b><br/>deterministic extractors,<br/>dispatched per lens"]
+    ret["<b>retrieval</b><br/>static embeddings + BM25,<br/>keyword fallback"]
+    db[("<b>SQLite property graph</b><br/>one file, one workspace per corpus<br/>workspaces · artifacts · chunks · entities · edges · mentions · lenses")]
+    lens --- db
+    prim --- db
+    ret --- db
+  end
 ```
 
 The system is split into two layers. The engine is a Python package that handles storage,
