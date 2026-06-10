@@ -56,8 +56,8 @@ Three design commitments follow:
 - **Skills**: the prompts that drive the pipeline. Induce a lens from your intent, build the
   graph, investigate with citations, and optionally synthesize a wiki from the graph. None of
   them are domain-specific; the lens carries all domain knowledge.
-- **Evaluation**: 8 corpora (code, legal, novels, a screenplay, a textbook, a cookbook, a
-  multi-volume canon), 160 verified questions, judged against a strong same-model baseline that
+- **Evaluation**: 7 corpora (code, legal, novels, a screenplay, a textbook, a cookbook), 140
+  verified questions, judged against a strong same-model baseline that
   reads the corpus directly. Tantva matches the baseline on accuracy overall and wins where the
   corpus has dense internal structure. Full results in
   [Problem, Data & Evaluation](evaluation.md).
