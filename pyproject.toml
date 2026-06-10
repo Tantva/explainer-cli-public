@@ -1,0 +1,31 @@
+[project]
+name = "explainer-cli"
+version = "0.7.0"
+description = "Tantva — cross-artifact knowledge investigation via your local Claude Code. Ingest code, docs, and PDFs; synthesize cross-source connections; ask grounded, cited questions."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "typer>=0.12",
+    "mcp>=1.2",
+    "tree-sitter>=0.23",
+    "tree-sitter-language-pack>=0.4",
+    "pymupdf>=1.24",
+    "markdown-it-py>=3.0",
+    "pyyaml>=6.0",     # parse OpenAPI/Swagger specs (the pluggable 'spec' medium)
+    "semble",          # content retrieval: Model2Vec + BM25 + RRF + code-aware rerank (ADR-002)
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+explainer = "explainer.cli:app"
+explainer-mcp = "explainer.mcp_server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/explainer"]

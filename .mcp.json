@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "explainer": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "cd \"${CLAUDE_PLUGIN_ROOT}\" && uv sync >&2 && exec uv run --no-sync explainer-mcp"
+      ]
+    }
+  }
+}

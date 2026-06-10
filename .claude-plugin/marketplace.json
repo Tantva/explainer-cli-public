@@ -1,0 +1,17 @@
+{
+  "name": "explainer-cli-public",
+  "owner": { "name": "Tantva" },
+  "description": "Tantva — cross-artifact knowledge investigation tooling.",
+  "plugins": [
+    {
+      "name": "explainer",
+      "source": "./",
+      "description": "Cross-artifact knowledge investigation: ingest code, docs, and PDFs; synthesize cross-source connections; ask grounded, cited questions — run by your local Claude Code.",
+      "version": "0.11.0",
+      "author": { "name": "Tantva" },
+      "homepage": "https://github.com/Tantva/explainer-cli-public",
+      "repository": "https://github.com/Tantva/explainer-cli-public",
+      "license": "MIT"
+    }
+  ]
+}
