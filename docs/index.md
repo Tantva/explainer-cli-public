@@ -75,7 +75,8 @@ next.
 - **Skills**: the prompts that drive the pipeline — induce a lens from your intent, build the
   graph, investigate with citations, optionally synthesize a wiki. None are domain-specific;
   the lens carries all domain knowledge.
-- **Evaluation**: 7 corpora, 140 verified questions, judged against a strong same-model
-  baseline that reads the corpus directly. Tantva matches the baseline on accuracy overall and
-  wins where the corpus has dense internal structure. Full results in
-  [Problem, Data & Evaluation](evaluation).
+- **Evaluation**: 8 corpora, 160 verified questions, judged against a strong same-model
+  baseline that reads the corpus directly. Tantva matches the baseline on accuracy overall,
+  wins where the corpus has dense internal structure, and on the largest corpus (a 624k-word,
+  8-volume canon) answers a full question set for ~30k tokens where a complete read costs ~810k,
+  every time. Full results in [Problem, Data & Evaluation](evaluation).

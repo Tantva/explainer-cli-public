@@ -24,10 +24,11 @@ The thesis under test:
 
 ## Method
 
-**Corpora.** Seven, spanning very different artifact types: six Sentry-pipeline repositories
+**Corpora.** Eight, spanning very different artifact types: six Sentry-pipeline repositories
 (code), a $950M credit agreement, two novels (*Dune*, *Pachinko*), a screenplay (*Andor*), a
-566-page cookbook, and a 1,099-page economics textbook. Each carries a 20-question set with a
-hand-verified, citation-grounded answer key.
+566-page cookbook, a 1,099-page economics textbook, and the complete Sherlock Holmes canon
+(8 volumes, ~624k words — included specifically to measure cost at scale). Each carries a
+20-question set with a hand-verified, citation-grounded answer key.
 
 **Contestants.** Two per corpus, run in fresh, isolated sessions with the answer keys removed:
 
@@ -62,7 +63,7 @@ failed without it:
 
 ## Results — text corpora
 
-Six corpora judged head-to-head, 20 points each.
+Seven corpora judged head-to-head, 20 points each.
 
 | Corpus | Artifact type | Size | grep | Tantva | Verdict |
 |---|---|---|---|---|---|
@@ -72,11 +73,13 @@ Six corpora judged head-to-head, 20 points each.
 | **Dune** (Book 1) | Novel | 345 pp | **20.0** | 19.5 | grep |
 | **Andor** screenplay | Screenplay | 55 pp | **20.0** | 19.5 | grep |
 | **Indian Economy** | Textbook | 1,099 pp | **18.0** | 17.0 | grep |
-| **Total** | | | **113.0 / 120** | **113.0 / 120** | **tie (94.2%)** |
+| **Sherlock Holmes canon** | Multi-volume canon | 624k words (8 vols) | 15.5 | **16.0** | **Tantva** — relational bucket 3.5 vs 2.0 |
+| **Total** | | | **128.5 / 140** | **129.0 / 140** | **parity (within half a point)** |
 
-**Thesis 1 (parity): confirmed.** A tie across 120 judged questions. Both contestants also passed
-all 16 out-of-corpus traps on every corpus — zero fabrication from memory on either side.
-Grounding discipline drives abstention; the index neither helps nor hurts it.
+**Thesis 1 (parity): confirmed.** 129.0 to 128.5 across 140 judged questions — parity. Both
+contestants also passed all 18 out-of-corpus traps on every corpus — zero fabrication from
+memory on either side. Grounding discipline drives abstention; the index neither helps nor
+hurts it.
 
 **Thesis 2 (structural advantage): confirmed where structure is dense — and only there.**
 
@@ -92,7 +95,12 @@ Grounding discipline drives abstention; the index neither helps nor hurts it.
   attentive reader holds the whole artifact; pre-built structure adds little accuracy.
 - **The textbook loss is an extraction-coverage loss, not a method loss**: a committee the
   extraction pass missed, two monetary-aggregate systems conflated. The graph is only as good as
-  its extraction pass; this bounds the architecture honestly.
+  its extraction pass; this bounds the architecture.
+- **The canon splits along surface form.** Named-entity aggregations ("every story Lestrade
+  appears in") stayed grep-friendly even at 624k words — surface forms are what text search is
+  good at, and the graph gave back points there to one fabricated edge and one volume miscount.
+  The graph won the questions with no greppable surface form: clients who deceive Holmes, cases
+  with no crime, relational patterns across volumes (relational bucket 3.5 vs 2.0).
 
 ## Results — code corpus (Sentry, six repos)
 
@@ -121,14 +129,22 @@ Ingest (one-time) is reported separately from query time (recurring):
 | Cookbook (566 pp) | ~310k tok (whole-book fan-out) | ~1.9M tok · 65 min | ~92 graph calls |
 | Textbook (1,099 pp) | ~80k tok · 22 min (selective) | ~1.4M tok · 22 min | ~57 calls |
 | Pachinko (481 pp) | ~29 calls · 20 min (recurs every session) | ~648k tok · 12 min | ~40 calls, zero page reads |
+| Sherlock canon (624k words) | ~20k tok sampled — its own report puts a complete read at **~810k, recurring** | ~854k tok · 3.4 h | **~30k tok · ~20 calls** |
 
-Two observations. First, at these sizes a single question set does not amortize the ingest; grep
-is often cheaper in total for one pass. Second, the structure of the asymmetry is exactly as
-claimed: Tantva's query pass is small and corpus-size-independent (~40–90 graph calls whether the
-corpus is 93k or 1M words, zero raw-page reads), while the baseline's cost recurs per question
-set and tracks corpus size. The relevant metric is flat query cost vs. linear, recurring read
-cost — which dominates when corpora are large and queried repeatedly, not "fewer tokens on a
-small document queried once."
+Two observations. First, at the single-document sizes a single question set does not amortize
+the ingest; grep is often cheaper in total for one pass. Second, the asymmetry has the claimed
+structure: Tantva's query pass is small and corpus-size-independent (~20–90 graph calls whether
+the corpus is 93k or 624k words, zero raw-page reads), while the baseline's cost recurs per
+question set and tracks corpus size.
+
+**At scale the asymmetry becomes measurable.** On the 624k-word canon the baseline faced a
+choice: read everything (~810k tokens, again on every future question set) or sample. It chose
+to sample (~20k tokens) and its own report flags seven answers as approximate tallies — the
+flagged answers map almost exactly onto the points it lost. Tantva paid ~854k tokens once — about
+the price of one honest full read — and then answered the whole set from the graph for ~30k.
+Against an honest reader, the ingest breaks even on the second question set and is roughly 27×
+cheaper per set thereafter; against a sampling reader, the difference is paid in accuracy instead
+of tokens.
 
 ## What we learned
 
@@ -150,8 +166,9 @@ small document queried once."
 
 ## Further research
 
-- **A scale sweep**: run the same question set at increasing corpus sizes and publish both cost
-  curves (reader linear, graph flat) with the break-even question-set count.
+- **Complete the scale curve**: the full-size point is measured (624k words: ~810k recurring vs
+  ~854k once + ~30k per set); run the same question set at 1- and 4-volume subsets to plot the
+  full reader-linear vs graph-flat curves.
 - **Extraction-coverage QA**: an adversarial "what did we miss?" pass at ingest (sampled re-reads
   diffed against the graph), targeting the gap behind every point Tantva lost.
 - **Repeat-query amortization**: measure real multi-session usage where one graph serves many
