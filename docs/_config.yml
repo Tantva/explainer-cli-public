@@ -1,0 +1,10 @@
+title: Tantva
+description: Cross-artifact knowledge investigation — one engine, many lenses.
+remote_theme: just-the-docs/just-the-docs@v0.8.2
+plugins:
+  - jekyll-remote-theme
+color_scheme: dark
+heading_anchors: true
+aux_links:
+  "Project code": "https://github.com/Tantva/explainer-cli-public"
+aux_links_new_tab: true

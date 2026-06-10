@@ -1,3 +1,7 @@
+---
+title: Home
+nav_order: 1
+---
 
 # Tantva
 
@@ -60,11 +64,11 @@ Three design commitments follow:
   verified questions, judged against a strong same-model baseline that
   reads the corpus directly. Tantva matches the baseline on accuracy overall and wins where the
   corpus has dense internal structure. Full results in
-  [Problem, Data & Evaluation](evaluation.md).
+  [Problem, Data & Evaluation](evaluation).
 
 ## The documents here
 
-- **[Personas](personas.md)**: who uses this, the difficulty they face, and how Tantva helps.
-- **[System Design](system-design.md)**: architecture, tradeoffs, chunking strategy, and tools.
-- **[Problem, Data & Evaluation](evaluation.md)**: methodology, results across all corpora,
+- **[Personas](personas)**: who uses this, the difficulty they face, and how Tantva helps.
+- **[System Design](system-design)**: architecture, tradeoffs, chunking strategy, and tools.
+- **[Problem, Data & Evaluation](evaluation)**: methodology, results across all corpora,
   learnings, and further research.
